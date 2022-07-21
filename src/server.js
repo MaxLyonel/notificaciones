@@ -6,28 +6,27 @@ const admin = require("firebase-admin");
 
 const Routes = "./routes";
 
+var serviceAccount = require("./keys/muserpol-pvt-9d002-firebase-adminsdk-7wr01-a4f5c7d947.json");
+
 class Server {
   constructor() {
     this.app = express();
     this.port = process.env.PORT;
-    // this.usersPath = '/api/users';
-    // this.rolesPath = '/api/roles';
 
-    // this.authPath = '/api/auth';
     this.notificationPath = "/api/notification";
 
-    var serviceAccount = require("./keys/muserpol-pvt-9d002-firebase-adminsdk-7wr01-a4f5c7d947.json");
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
-    //conectar a DB
-    // this.contectDB();
-
+    this.firebase()
     //Middlewares
     this.middlewares();
 
     //Rutas de mi aplicación
     this.routes();
+  }
+
+  firebase(){
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
   }
   middlewares() {
     //cors

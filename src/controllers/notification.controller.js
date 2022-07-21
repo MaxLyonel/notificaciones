@@ -1,16 +1,77 @@
 const { request, response } = require("express");
-const Notification = require("./notifications.js");
+const admin = require("firebase-admin");
 
-const notification = async (req = request, res = response) => {
+const notificationOneUser = async (req = request, res = response) => {
   try {
-    const { tokenId, title, body } = req.body;
-    const data = {
-      tokenId,
-      title,
-      body,
+    const { token, title, body, image, data } = req.body;
+    const message = {
+      token: token,
+      notification: {
+        title: title,
+        body: body,
+      },
+      data: data,
+      apns: {
+        payload: {
+          aps: {
+            contentAvailable: true,
+          },
+        },
+        headers: {
+          "apns-push-type": "background",
+          "apns-priority": "5", // Must be `5` when `contentAvailable` is set to true.
+          "apns-topic": "io.flutter.plugins.firebase.messaging", // bundle identifier
+        },
+      },
     };
-    Notification.sendPushToOneUser(data);
-    res.json({msg:"hola"})
+    if (image != null) {
+      message.notification.image = image;
+    }
+    admin
+      .messaging()
+      .send(message)
+      .then((response) => {
+        res.json({ msg: "Successfully sent message", message: response });
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      msg: "Hable con el administrador",
+    });
+  }
+};
+const notificationTopic = async (req = request, res = response) => {
+  try {
+    const { topic, title, body, image, data } = req.body;
+    const message = {
+      topic: topic,
+      notification: {
+        title: title,
+        body: body,
+      },
+      data: data,
+      apns: {
+        payload: {
+          aps: {
+            contentAvailable: true,
+          },
+        },
+        headers: {
+          "apns-push-type": "background",
+          "apns-priority": "5", // Must be `5` when `contentAvailable` is set to true.
+          "apns-topic": "io.flutter.plugins.firebase.messaging", // bundle identifier
+        },
+      },
+    };
+    if (image != null) {
+      message.notification.image = image;
+    }
+    admin
+      .messaging()
+      .send(message)
+      .then((response) => {
+        res.json({ msg: "Successfully sent message", message: response });
+      });
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -19,5 +80,6 @@ const notification = async (req = request, res = response) => {
   }
 };
 module.exports = {
-    notification
+  notificationOneUser,
+  notificationTopic,
 };
