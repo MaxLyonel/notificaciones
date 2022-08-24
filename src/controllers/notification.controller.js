@@ -1,21 +1,66 @@
 const { request, response } = require("express");
 const admin = require("firebase-admin");
 
+const notificationTest = async (req = request, res = response) => {
+  try {
+    const { tokenDevice, title, body, image, collapse_key, data } = req.body;
+    var today = new Date();
+    var date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds() + ":" + today.getMilliseconds();
+    data.date = date + ' ' + time;
+    const token = tokenDevice;
+    console.log('Sending notification...');
+
+    const payload = {
+      notification: {
+        title: title,
+        body: body
+      },
+      data:data
+    };
+
+    const options = {
+      collapseKey: collapse_key
+    };
+    if (image != null) {
+      payload.notification.image = image;
+    }
+    admin
+      .messaging()
+      .sendToDevice(token, payload, options)
+      .then((response) => {
+        res.json({ msg: "Successfully sent message", message: response });
+      })
+      .catch((error) => {
+        console.log(error);
+        res.status(400).json(error);
+      })
+      ;
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      msg: "Hable con el administrador",
+    });
+  }
+};
+
 const notificationOneUser = async (req = request, res = response) => {
   try {
-    const { token, title, body, image, data } = req.body;
+    const { token, title, body, image, collapse_key, data } = req.body;
+    var today = new Date();
+    var date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds() + ":" + today.getMilliseconds();
+    data.date = date + ' ' + time;
     const message = {
       token: token,
       notification: {
-        title: title,
+        title: collapse_key,
         body: body,
       },
       data: data,
       android: {
-        priority: "high",
-        notification: {
-          imageUrl: 'https://foo.bar.pizza-monster.png'
-        }
+        collapseKey: collapse_key,
+        priority: "high"
       },
       apns: {
         payload: {
@@ -38,8 +83,12 @@ const notificationOneUser = async (req = request, res = response) => {
       .messaging()
       .send(message)
       .then((response) => {
-        res.json({ msg: "Successfully sent message", message: response });
-      });
+        res.json({ msg: "Successfully sent message", message: response, mm: message });
+      })
+      .catch((error) => {
+        res.status(400).json(error);
+      })
+      ;
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -49,7 +98,11 @@ const notificationOneUser = async (req = request, res = response) => {
 };
 const notificationGroupUsers = async (req = request, res = response) => {
   try {
-    const { tokens, title, body, image, data } = req.body;
+    const { tokens, title, body, image, data, collapse_key } = req.body;
+    var today = new Date();
+    var date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds() + ":" + today.getMilliseconds();
+    data.date = date + ' ' + time;
     const message = {
       tokens: tokens,
       notification: {
@@ -57,6 +110,10 @@ const notificationGroupUsers = async (req = request, res = response) => {
         body: body,
       },
       data: data,
+      android: {
+        collapseKey: collapse_key,
+        priority: "high",
+      },
       apns: {
         payload: {
           aps: {
@@ -79,7 +136,10 @@ const notificationGroupUsers = async (req = request, res = response) => {
       .sendMulticast(message)
       .then((response) => {
         res.json({ msg: "Successfully sent message", message: response });
-      });
+      })
+      .catch((err) =>
+        res.status(400).json(err))
+      ;
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -90,6 +150,10 @@ const notificationGroupUsers = async (req = request, res = response) => {
 const notificationTopic = async (req = request, res = response) => {
   try {
     const { topic, title, body, image, data } = req.body;
+    var today = new Date();
+    var date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds() + ":" + today.getMilliseconds();
+    data.date = date + ' ' + time;
     const message = {
       topic: topic,
       notification: {
@@ -118,7 +182,10 @@ const notificationTopic = async (req = request, res = response) => {
       .send(message)
       .then((response) => {
         res.json({ msg: "Successfully sent message", message: response });
-      });
+      })
+      .catch((err) =>
+        res.status(400).json(err))
+      ;
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -126,8 +193,10 @@ const notificationTopic = async (req = request, res = response) => {
     });
   }
 };
+
 module.exports = {
+  notificationTest,
   notificationOneUser,
   notificationGroupUsers,
-  notificationTopic,
+  notificationTopic
 };
