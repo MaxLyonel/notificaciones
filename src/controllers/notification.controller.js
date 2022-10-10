@@ -16,7 +16,7 @@ const notificationTest = async (req = request, res = response) => {
         title: title,
         body: body
       },
-      data:data
+      data: data
     };
 
     const options = {
@@ -98,7 +98,7 @@ const notificationOneUser = async (req = request, res = response) => {
 };
 const notificationGroupUsers = async (req = request, res = response) => {
   try {
-    const { tokens, title, body, image, data, collapse_key } = req.body;
+    const { tokens, title, body, image, data } = req.body;
     var today = new Date();
     var date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
     var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds() + ":" + today.getMilliseconds();
@@ -111,7 +111,7 @@ const notificationGroupUsers = async (req = request, res = response) => {
       },
       data: data,
       android: {
-        collapseKey: collapse_key,
+        // collapseKey: collapse_key,
         priority: "high",
       },
       apns: {
@@ -131,19 +131,24 @@ const notificationGroupUsers = async (req = request, res = response) => {
     if (image != null) {
       message.notification.image = image;
     }
+    console.log(tokens)
     admin
       .messaging()
       .sendMulticast(message)
       .then((response) => {
+        console.log('HOLA ESTOY ENVIANDO UNA NOTIFICACION')
+        console.log(response);
         res.json({ msg: "Successfully sent message", message: response });
       })
-      .catch((err) =>
-        res.status(400).json(err))
+      .catch((error)=> {
+        console.log(error);
+        res.status(400).json({ msg: "error", message: error });
+      })
       ;
   } catch (error) {
     console.log(error);
     res.status(500).json({
-      msg: "Hable con el administrador",
+      msg: "Hable con el administrador", message: error
     });
   }
 }
