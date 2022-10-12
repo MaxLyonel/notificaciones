@@ -13,9 +13,13 @@ class Server {
     this.app = express();
     this.port = process.env.PORT;
 
-    this.notificationPath = "/api/notification";
+    this.paths = {
+      home: '/',
+      notification: '/api/notification',
+    }
 
-    this.firebase()
+    this.firebase();
+
     //Middlewares
     this.middlewares();
 
@@ -23,7 +27,7 @@ class Server {
     this.routes();
   }
 
-  firebase(){
+  firebase() {
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
     });
@@ -36,9 +40,11 @@ class Server {
   }
 
   routes() {
-    //RUTAS
+    this.app.get(this.paths.home, function(request, response){
+      response.sendFile(`${__dirname}/public/index.html`);
+  });
     this.app.use(
-      this.notificationPath,
+      this.paths.notification,
       require(`${Routes}/notification.route`)
     );
   }

@@ -9,6 +9,7 @@ const {
   notificationOneUser,
   notificationTopic,
   notificationGroupUsers,
+  notificationBatch
 } = require("../controllers/notification.controller");
 const router = Router();
 
@@ -54,6 +55,11 @@ router.post(
     validarCampos,
   ],
   notificationTopic
+);
+
+router.post(
+  "/batch",
+  notificationBatch
 );
 
 module.exports = router;
