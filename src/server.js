@@ -6,28 +6,31 @@ const admin = require("firebase-admin");
 
 const Routes = "./routes";
 
+var serviceAccount = require("./keys/muserpol-pvt-9d002-firebase-adminsdk-7wr01-a4f5c7d947.json");
+
 class Server {
   constructor() {
     this.app = express();
     this.port = process.env.PORT;
-    // this.usersPath = '/api/users';
-    // this.rolesPath = '/api/roles';
 
-    // this.authPath = '/api/auth';
-    this.notificationPath = "/api/notification";
+    this.paths = {
+      home: '/',
+      notification: '/api/notification',
+    }
 
-    var serviceAccount = require("./keys/muserpol-pvt-9d002-firebase-adminsdk-7wr01-a4f5c7d947.json");
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
-    //conectar a DB
-    // this.contectDB();
+    this.firebase();
 
     //Middlewares
     this.middlewares();
 
     //Rutas de mi aplicación
     this.routes();
+  }
+
+  firebase() {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
   }
   middlewares() {
     //cors
@@ -37,16 +40,18 @@ class Server {
   }
 
   routes() {
-    //RUTAS
+    this.app.get(this.paths.home, function(request, response){
+      response.sendFile(`${__dirname}/public/index.html`);
+  });
     this.app.use(
-      this.notificationPath,
+      this.paths.notification,
       require(`${Routes}/notification.route`)
     );
   }
 
   listen() {
     this.app.listen(this.port, () => {
-      console.log("Servidor correindo en puerto", this.port);
+      console.log("Servidor corriendo en puerto", this.port);
     });
   }
 }

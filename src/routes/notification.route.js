@@ -4,21 +4,62 @@ const { check } = require("express-validator");
 
 const { validarCampos } = require("../middlewares/validar-campos");
 
-const { notification } = require("../controllers/notification.controller");
+const {
+  notificationTest,
+  notificationOneUser,
+  notificationTopic,
+  notificationGroupUsers,
+  notificationBatch
+} = require("../controllers/notification.controller");
 const router = Router();
 
-router.get(
-  "/",
+router.post(
+  "/test",
   [
-    check("tokenId", "La contrasena debe de ser más de 6 letras").isLength({
-      min: 5,
-    }),
-    check("title", "El correo no es válido").isLength({
-      min: 1,
-    }),
+    check("tokenDevice", "El token es necesario").not().isEmpty(),
+    check("title", "El title es necesario").not().isEmpty(),
+    check("body", "El body es necesario").not().isEmpty(),
+    check("image", "El image es necesario").optional().not().isEmpty(),
+    check("data", "El data es necesario").not().isEmpty(),
     validarCampos,
   ],
-  notification
+  notificationTest
+);
+
+router.post(
+  "/oneuser",
+  [
+    check("token", "El token es necesario").not().isEmpty(),
+    check("title", "El title es necesario").not().isEmpty(),
+    check("body", "El body es necesario").not().isEmpty(),
+    check("image", "El image es necesario").optional().not().isEmpty(),
+    check("data", "El data es necesario").not().isEmpty(),
+    validarCampos,
+  ],
+  notificationOneUser
+);
+
+router.post(
+  "/groupusers",
+  notificationGroupUsers
+);
+
+router.post(
+  "/topic",
+  [
+    check("topic", "El topic es necesario").not().isEmpty(),
+    check("title", "El title es necesario").not().isEmpty(),
+    check("body", "El body es necesario").not().isEmpty(),
+    check("image", "El image es necesario").optional().not().isEmpty(),
+    check("data", "El data es necesario").not().isEmpty(),
+    validarCampos,
+  ],
+  notificationTopic
+);
+
+router.post(
+  "/batch",
+  notificationBatch
 );
 
 module.exports = router;

@@ -2,3 +2,4 @@ node_modules
 /src/keys
 dist
 !/src/keys
+.env
